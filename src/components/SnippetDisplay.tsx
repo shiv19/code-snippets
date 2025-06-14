@@ -5,8 +5,9 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
-import { Copy, Pencil } from 'lucide-react';
+import { Copy, Pencil, History } from 'lucide-react';
 import { SnippetForm } from './SnippetForm';
+import { VersionHistory } from './VersionHistory';
 
 export const SnippetDisplay = () => {
   const {
@@ -14,6 +15,7 @@ export const SnippetDisplay = () => {
     deleteSnippet
   } = useSnippets();
   const [isEditing, setIsEditing] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const handleCopy = () => {
     if (!selectedSnippet) return;
@@ -35,6 +37,10 @@ export const SnippetDisplay = () => {
             <span className="text-sm text-muted-foreground uppercase">{selectedSnippet.language}</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={() => setShowHistory(true)}>
+              <History className="mr-2 h-4 w-4" />
+              History
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
               <Pencil className="mr-2 h-4 w-4" />
               Edit
@@ -62,6 +68,13 @@ export const SnippetDisplay = () => {
         onOpenChange={setIsEditing}
         snippetToEdit={selectedSnippet}
       />
+      {selectedSnippet && (
+        <VersionHistory 
+          open={showHistory}
+          onOpenChange={setShowHistory}
+          snippet={selectedSnippet}
+        />
+      )}
     </>
   );
 };

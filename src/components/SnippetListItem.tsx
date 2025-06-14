@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Snippet, useSnippets } from '@/context/SnippetContext';
+import { useSnippets } from '@/context/SnippetContext';
+import { Snippet } from '@/types';
 
 interface SnippetListItemProps {
   snippet: Snippet;

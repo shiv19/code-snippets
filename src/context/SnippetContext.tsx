@@ -1,11 +1,10 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Snippet as OriginalSnippet } from '@/types';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { Snippet } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
-
-export type Snippet = Omit<OriginalSnippet, 'language'> & {
-  language: string;
-};
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/db';
+import { toast } from 'sonner';
 
 const initialSnippets: Snippet[] = [
   {
@@ -51,41 +50,70 @@ interface SnippetContextType {
 const SnippetContext = createContext<SnippetContextType | undefined>(undefined);
 
 export const SnippetProvider = ({ children }: { children: ReactNode }) => {
-  const [snippets, setSnippets] = useState<Snippet[]>(initialSnippets);
-  const [selectedSnippet, setSelectedSnippet] = useState<Snippet | null>(initialSnippets[0] || null);
+  const snippets = useLiveQuery(() => db.snippets.orderBy('createdAt').reverse().toArray(), []);
+  
+  const [selectedSnippetId, setSelectedSnippetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const setup = async () => {
+      try {
+        await db.open();
+        const count = await db.snippets.count();
+        if (count === 0 && initialSnippets.length > 0) {
+          await db.snippets.bulkAdd(initialSnippets);
+          toast.info("Added some example snippets for you!");
+        }
+      } catch (error) {
+        console.error("Failed to initialize database:", error);
+        toast.error("Could not initialize database.");
+      }
+    };
+    setup();
+  }, []);
+
+  useEffect(() => {
+    if (snippets) {
+      const currentSelectionExists = snippets.some(s => s.id === selectedSnippetId);
+      if (!currentSelectionExists && snippets.length > 0) {
+        setSelectedSnippetId(snippets[0].id);
+      } else if (snippets.length === 0) {
+        setSelectedSnippetId(null);
+      }
+    }
+  }, [snippets, selectedSnippetId]);
+
+  const selectedSnippet = snippets?.find(s => s.id === selectedSnippetId) || null;
 
   const selectSnippet = (id: string | null) => {
-    if (id === null) {
-      setSelectedSnippet(null);
-      return;
-    }
-    const snippet = snippets.find(s => s.id === id) || null;
-    setSelectedSnippet(snippet);
+    setSelectedSnippetId(id);
   };
 
-  const addSnippet = (snippet: Omit<Snippet, 'id' | 'createdAt'>) => {
+  const addSnippet = async (snippet: Omit<Snippet, 'id' | 'createdAt'>) => {
     const newSnippet: Snippet = {
       ...snippet,
       id: uuidv4(),
       createdAt: new Date().toISOString(),
     };
-    const updatedSnippets = [newSnippet, ...snippets];
-    setSnippets(updatedSnippets);
-    selectSnippet(newSnippet.id);
+    try {
+      const newId = await db.snippets.add(newSnippet);
+      setSelectedSnippetId(newId as string);
+    } catch (error) {
+      console.error("Failed to add snippet:", error);
+      toast.error("Failed to save snippet.");
+    }
   };
 
-  const deleteSnippet = (id: string) => {
-    setSnippets(prev => {
-      const updated = prev.filter(s => s.id !== id);
-      if (selectedSnippet?.id === id) {
-        selectSnippet(updated[0]?.id || null);
-      }
-      return updated;
-    });
+  const deleteSnippet = async (id: string) => {
+    try {
+        await db.snippets.delete(id);
+    } catch(error) {
+        console.error("Failed to delete snippet:", error);
+        toast.error("Failed to delete snippet.");
+    }
   };
 
   return (
-    <SnippetContext.Provider value={{ snippets, selectedSnippet, selectSnippet, addSnippet, deleteSnippet }}>
+    <SnippetContext.Provider value={{ snippets: snippets || [], selectedSnippet, selectSnippet, addSnippet, deleteSnippet }}>
       {children}
     </SnippetContext.Provider>
   );

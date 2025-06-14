@@ -2,7 +2,7 @@
 export interface Snippet {
   id: string;
   title: string;
-  language: 'typescript' | 'javascript';
+  language: string;
   code: string;
   createdAt: string;
 }

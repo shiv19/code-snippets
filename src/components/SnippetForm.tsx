@@ -1,15 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogDescription } from "@/components/ui/dialog";
 import { useSnippets } from '@/context/SnippetContext';
+import { Snippet } from '@/types';
 
 interface SnippetFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  snippetToEdit?: Snippet | null;
 }
 
 const languages = [
@@ -32,19 +34,37 @@ const languages = [
     { value: 'plaintext', label: 'Plain Text' },
 ];
 
-export const SnippetForm: React.FC<SnippetFormProps> = ({ open, onOpenChange }) => {
+export const SnippetForm: React.FC<SnippetFormProps> = ({ open, onOpenChange, snippetToEdit }) => {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('typescript');
   const [code, setCode] = useState('');
-  const { addSnippet } = useSnippets();
+  const { addSnippet, updateSnippet } = useSnippets();
+  const isEditing = !!snippetToEdit;
+
+  useEffect(() => {
+    if (open) {
+      if (isEditing && snippetToEdit) {
+        setTitle(snippetToEdit.title);
+        setLanguage(snippetToEdit.language);
+        setCode(snippetToEdit.code);
+      } else {
+        setTitle('');
+        setLanguage('typescript');
+        setCode('');
+      }
+    }
+  }, [snippetToEdit, isEditing, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !code) return;
-    addSnippet({ title, language, code });
-    setTitle('');
-    setLanguage('typescript');
-    setCode('');
+    
+    if (isEditing && snippetToEdit) {
+      updateSnippet(snippetToEdit.id, { title, language, code });
+    } else {
+      addSnippet({ title, language, code });
+    }
+    
     onOpenChange(false);
   };
 
@@ -52,9 +72,9 @@ export const SnippetForm: React.FC<SnippetFormProps> = ({ open, onOpenChange }) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[625px] bg-card">
         <DialogHeader>
-          <DialogTitle>Create a New Snippet</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Snippet' : 'Create a New Snippet'}</DialogTitle>
           <DialogDescription>
-            Add a title, select a language, and write your code snippet below.
+            {isEditing ? 'Edit the title, language, or code of your snippet.' : 'Add a title, select a language, and write your code snippet below.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
@@ -87,7 +107,7 @@ export const SnippetForm: React.FC<SnippetFormProps> = ({ open, onOpenChange }) 
             <DialogClose asChild>
               <Button type="button" variant="secondary">Cancel</Button>
             </DialogClose>
-            <Button type="submit">Create Snippet</Button>
+            <Button type="submit">{isEditing ? 'Save Changes' : 'Create Snippet'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

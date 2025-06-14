@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Snippet, SnippetVersion } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -50,6 +49,7 @@ interface SnippetContextType {
   addSnippet: (snippet: Omit<Snippet, 'id' | 'createdAt' | 'updatedAt' | 'history'>) => void;
   updateSnippet: (id: string, updates: { title: string; language: string; code: string; }) => void;
   deleteSnippet: (id: string) => void;
+  deleteSnippetVersion: (snippetId: string, versionCreatedAt: string) => void;
 }
 
 const SnippetContext = createContext<SnippetContextType | undefined>(undefined);
@@ -141,14 +141,38 @@ export const SnippetProvider = ({ children }: { children: ReactNode }) => {
   const deleteSnippet = async (id: string) => {
     try {
         await db.snippets.delete(id);
+        toast.success("Snippet deleted!");
     } catch(error) {
         console.error("Failed to delete snippet:", error);
         toast.error("Failed to delete snippet.");
     }
   };
 
+  const deleteSnippetVersion = async (snippetId: string, versionCreatedAt: string) => {
+    try {
+      const snippetToUpdate = await db.snippets.get(snippetId);
+      if (!snippetToUpdate) {
+        toast.error("Snippet not found.");
+        return;
+      }
+
+      const updatedHistory = snippetToUpdate.history.filter(
+        version => version.createdAt !== versionCreatedAt
+      );
+
+      await db.snippets.update(snippetId, {
+        history: updatedHistory,
+      });
+
+      toast.success("Snippet version deleted!");
+    } catch (error) {
+      console.error("Failed to delete snippet version:", error);
+      toast.error("Failed to delete snippet version.");
+    }
+  };
+
   return (
-    <SnippetContext.Provider value={{ snippets: snippets || [], selectedSnippet, selectSnippet, addSnippet, updateSnippet, deleteSnippet }}>
+    <SnippetContext.Provider value={{ snippets: snippets || [], selectedSnippet, selectSnippet, addSnippet, updateSnippet, deleteSnippet, deleteSnippetVersion }}>
       {children}
     </SnippetContext.Provider>
   );

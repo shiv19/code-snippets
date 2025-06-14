@@ -4,8 +4,9 @@ import { useSnippets } from '@/context/SnippetContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Button } from './ui/button';
+import { Alert, AlertDescription } from './ui/alert';
 import { toast } from 'sonner';
-import { Copy, Pencil, History } from 'lucide-react';
+import { Copy, Pencil, History, Database } from 'lucide-react';
 import { SnippetForm } from './SnippetForm';
 import { VersionHistory } from './VersionHistory';
 
@@ -24,13 +25,30 @@ export const SnippetDisplay = () => {
   };
 
   if (!selectedSnippet) {
-    return <div className="flex-1 flex items-center justify-center text-muted-foreground">
-        <p>Select a snippet to view, or create a new one.</p>
-      </div>;
+    return (
+      <div className="flex-1 flex flex-col h-full overflow-y-auto">
+        <Alert className="m-4 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+          <Database className="h-4 w-4" />
+          <AlertDescription>
+            All snippets are stored locally in your browser. They won't be synced across devices or backed up automatically.
+          </AlertDescription>
+        </Alert>
+        <div className="flex-1 flex items-center justify-center text-muted-foreground">
+          <p>Select a snippet to view, or create a new one.</p>
+        </div>
+      </div>
+    );
   }
+
   return (
     <>
       <div className="flex-1 flex flex-col h-full overflow-y-auto">
+        <Alert className="m-4 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+          <Database className="h-4 w-4" />
+          <AlertDescription>
+            All snippets are stored locally in your browser. They won't be synced across devices or backed up automatically.
+          </AlertDescription>
+        </Alert>
         <div className="p-4 border-b border-border flex justify-between items-center">
           <div>
             <h2 className="text-xl font-bold text-neutral-50">{selectedSnippet.title}</h2>

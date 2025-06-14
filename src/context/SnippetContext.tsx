@@ -1,7 +1,11 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Snippet } from '@/types';
+import { Snippet as OriginalSnippet } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
+
+export type Snippet = Omit<OriginalSnippet, 'language'> & {
+  language: string;
+};
 
 const initialSnippets: Snippet[] = [
   {

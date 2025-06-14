@@ -1,10 +1,12 @@
+
 import React from 'react';
-import { Snippet } from '@/types';
-import { useSnippets } from '@/context/SnippetContext';
 import { cn } from '@/lib/utils';
+import { Snippet, useSnippets } from '@/context/SnippetContext';
+
 interface SnippetListItemProps {
   snippet: Snippet;
 }
+
 export const SnippetListItem: React.FC<SnippetListItemProps> = ({
   snippet
 }) => {

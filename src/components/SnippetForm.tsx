@@ -12,9 +12,29 @@ interface SnippetFormProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const languages = [
+    { value: 'javascript', label: 'JavaScript' },
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'python', label: 'Python' },
+    { value: 'java', label: 'Java' },
+    { value: 'csharp', label: 'C#' },
+    { value: 'php', label: 'PHP' },
+    { value: 'ruby', label: 'Ruby' },
+    { value: 'go', label: 'Go' },
+    { value: 'rust', label: 'Rust' },
+    { value: 'html', label: 'HTML' },
+    { value: 'css', label: 'CSS' },
+    { value: 'sql', label: 'SQL' },
+    { value: 'json', label: 'JSON' },
+    { value: 'yaml', label: 'YAML' },
+    { value: 'markdown', label: 'Markdown' },
+    { value: 'shell', label: 'Shell/Bash' },
+    { value: 'plaintext', label: 'Plain Text' },
+];
+
 export const SnippetForm: React.FC<SnippetFormProps> = ({ open, onOpenChange }) => {
   const [title, setTitle] = useState('');
-  const [language, setLanguage] = useState<'typescript' | 'javascript'>('typescript');
+  const [language, setLanguage] = useState('typescript');
   const [code, setCode] = useState('');
   const { addSnippet } = useSnippets();
 
@@ -43,13 +63,14 @@ export const SnippetForm: React.FC<SnippetFormProps> = ({ open, onOpenChange }) 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <Select value={language} onValueChange={(value: 'typescript' | 'javascript') => setLanguage(value)}>
+          <Select value={language} onValueChange={setLanguage}>
             <SelectTrigger>
               <SelectValue placeholder="Select a language" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="typescript">TypeScript</SelectItem>
-              <SelectItem value="javascript">JavaScript</SelectItem>
+              {languages.map(lang => (
+                <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <div className="border border-input rounded-md overflow-hidden">

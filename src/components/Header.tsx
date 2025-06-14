@@ -6,7 +6,7 @@ export const Header = () => {
   return (
     <header className="p-4 border-b border-border flex items-center gap-2">
       <FileCode2 className="text-primary" />
-      <h1 className="text-xl font-bold text-secondary">Dev Snippets</h1>
+      <h1 className="text-xl font-bold text-secondary">Code Snippets</h1>
     </header>
   );
 };

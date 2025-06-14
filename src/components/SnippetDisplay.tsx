@@ -2,7 +2,7 @@
 import React from 'react';
 import { useSnippets } from '@/context/SnippetContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Button } from './ui/button';
 
 export const SnippetDisplay = () => {
@@ -28,7 +28,7 @@ export const SnippetDisplay = () => {
         </Button>
       </div>
       <div className="flex-1 bg-[#282c34] overflow-auto">
-        <SyntaxHighlighter language={selectedSnippet.language} style={atomOneDark} customStyle={{ margin: 0, height: '100%' }}>
+        <SyntaxHighlighter language={selectedSnippet.language} style={atomDark} customStyle={{ margin: 0, height: '100%' }}>
           {selectedSnippet.code}
         </SyntaxHighlighter>
       </div>
